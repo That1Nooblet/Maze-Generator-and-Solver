@@ -173,11 +173,12 @@ def draw_handler(model):
         if wall[1] == 0:
             mStart[1] += halfSize
             mEnd[1] += -halfSize
-            
-        if mouseDir in model["grid"][(mgx,mgy)]:
-                pygame.draw.line(screen, "red", mStart, mEnd)
-        else:
-                pygame.draw.line(screen, "blue", mStart, mEnd)
+        
+        if inBound((mgx, mgy)):
+            if mouseDir in model["grid"][(mgx,mgy)]:
+                    pygame.draw.line(screen, "red", mStart, mEnd)
+            else:
+                    pygame.draw.line(screen, "blue", mStart, mEnd)
                 
     # draw walls
     wall_color = pygame.color.Color("black")
