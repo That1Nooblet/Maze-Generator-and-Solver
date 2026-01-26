@@ -10,7 +10,8 @@ QUIT = "EXIT"
 gridSize = (50,50)
 tileSize = 11
 halfSize = tileSize // 2
-size = (gridSize[0] * tileSize, gridSize[1] * tileSize)
+sidebarWidth = 220
+size = (gridSize[0] * tileSize + sidebarWidth, gridSize[1] * tileSize)
 
 def init():
     global screen, clock
@@ -68,10 +69,64 @@ def getWallDir(dx, dy):
                 minDist = dists[i]
     return minIdx
 
+def draw_sidebar(model):
+    panel_x = gridSize[0] * tileSize
+    panel_rect = pygame.Rect(panel_x, 0, sidebarWidth, size[1])
+
+    pygame.draw.rect(screen, pygame.Color("lightgray"), panel_rect)
+    
+    font_big = pygame.font.SysFont(None, 22)
+    font_small = pygame.font.SysFont(None, 15)
+    color = pygame.Color("black")
+
+    info = [
+        "Current Algorithm:",
+        f"  {model['search']}",
+        "",
+        "Path Length:",
+        f"  {len(model['path'])}",
+        "",
+        "Explored Nodes:",
+        f"  {len(model['order'])}",
+        "",
+    ]
+
+    hotkeys = [
+        
+        "Hotkeys:",
+        "  1  DFS",
+        "  2  BFS",
+        "  3  A*",
+        "  4  A* Weighted",
+        "  5  BFS 2-Way",
+        "  6  A* 2-Way",
+        "",
+        "  SPACE  Build / Run",
+        "  R      Reset",
+        "  G      Gen Maze 1",
+        "  H      Gen Maze 2",
+        "  Q      Quit",
+    ]
+
+    y = 20
+    for line in info:
+        text = font_big.render(line, True, color)
+        screen.blit(text, (panel_x + 15, y))
+        y += 28
+
+    
+    for line in hotkeys:
+        text = font_small.render(line, True, color)
+        screen.blit(text, (panel_x + 15, y))
+        y += 20
+
+
 def draw_handler(model):
     global screen
     bgcolor = pygame.color.Color("orange")
     screen.fill(bgcolor)
+
+    draw_sidebar(model)
     
     wallDir = {0 : (0,-1), 1 : (1,0), 2 : (0,1), 3 : (-1, 0)}
     
