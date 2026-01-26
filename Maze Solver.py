@@ -86,7 +86,7 @@ def draw_sidebar(model):
         "Path Length:",
         f"  {len(model['path'])}",
         "",
-        "Explored Nodes:",
+        "Explored Tiles:",
         f"  {min(model['order_index'], len(model['order']))}",
     ]
 
@@ -217,6 +217,7 @@ def reset(model):
     model["order_index"] = -1
     model["order"] = []
     model["path"] = []
+    model["end"] = (gridSize[0] - 1, gridSize[1] - 1)
 
 def genMaze1(model):
     wallDir = {0 : (0,-1), 1 : (1,0), 2 : (0,1), 3 : (-1, 0)}
