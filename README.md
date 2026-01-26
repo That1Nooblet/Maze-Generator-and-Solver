@@ -7,7 +7,8 @@ G - Maze Generation 1 (randomly create walls)
 H - Maze Generation 2 (DFS-assisted maze generation)
 R - Reset/Clear
 Space - Toggle Between Build and Solve Mode
-Left Click - Set starting point
+Left Click (During Build Mode) - Place or Delete a wall
+Left Click (During Solve Mode) - Set starting point
 Right Click - Set ending point
 P - Skip to path retracing animation
 
