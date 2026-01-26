@@ -7,7 +7,7 @@ from pygame.locals import *
 # ----------MAZE MAKER----------
 
 QUIT = "EXIT"
-gridSize = (50,50)
+gridSize = (50, 50)
 tileSize = 11
 halfSize = tileSize // 2
 sidebarWidth = 220
@@ -29,7 +29,7 @@ def main():
             "state" : "build", 
             "start" : (-1,-1),
             "end" : (gridSize[0] - 1, gridSize[1] - 1), 
-            "search" : "astar",
+            "search" : "A*",
             "order_index" : -1, 
             "order" : [], 
             "path" : [], 
@@ -57,7 +57,7 @@ def main():
         
         draw_handler(model)
         pygame.display.flip()
-        clock.tick(1000)
+        clock.tick(240)
 
 def getWallDir(dx, dy):
     dists = [dy, tileSize-dx, tileSize-dy, dx]
@@ -75,8 +75,8 @@ def draw_sidebar(model):
 
     pygame.draw.rect(screen, pygame.Color("lightgray"), panel_rect)
     
-    font_big = pygame.font.SysFont(None, 22)
-    font_small = pygame.font.SysFont(None, 15)
+    font_big = pygame.font.SysFont(None, 18)
+    font_small = pygame.font.SysFont(None, 14)
     color = pygame.Color("black")
 
     info = [
@@ -88,11 +88,10 @@ def draw_sidebar(model):
         "",
         "Explored Nodes:",
         f"  {min(model['order_index'], len(model['order']))}",
-        "",
     ]
 
     hotkeys = [
-        
+        "",
         "Hotkeys:",
         "  1  DFS",
         "  2  BFS",
@@ -101,7 +100,12 @@ def draw_sidebar(model):
         "  5  BFS 2-Way",
         "  6  A* 2-Way",
         "",
-        "  SPACE  Build / Solve",
+        "  SPACE - Build / Solve",
+        "  Left Click (Build) - Place / Delete Wall",
+        "  Left Click (Solve) - Start Animation",
+        "  Right Click - Set End",
+        "",
+        "  P      Skip Animation",
         "  R      Reset",
         "  G      Gen Maze 1",
         "  H      Gen Maze 2",
@@ -112,13 +116,13 @@ def draw_sidebar(model):
     for line in info:
         text = font_big.render(line, True, color)
         screen.blit(text, (panel_x + 15, y))
-        y += 28
+        y += 22
 
     
     for line in hotkeys:
         text = font_small.render(line, True, color)
         screen.blit(text, (panel_x + 15, y))
-        y += 20
+        y += 18
 
 
 def draw_handler(model):
@@ -317,18 +321,18 @@ def key_handler(model, event):
     elif k == pygame.K_p:
         model["order_index"] = len(model["order"]) - 1
     elif k == pygame.K_1:
-        model["search"] = "dfs"
+        model["search"] = "DFS"
     elif k == pygame.K_2:
-        model["search"] = "bfs"
+        model["search"] = "BFS"
     elif k == pygame.K_3:
-        model["search"] = "astar"
+        model["search"] = "A*"
     elif k == pygame.K_4:
-        model["search"] = "astar_weighted"
+        model["search"] = "A* Weighted"
     elif k == pygame.K_5:
-        model["search"] = "bfs2way"
+        model["search"] = "BFS 2-Way"
     elif k == pygame.K_6:
-        model["search"] = "astar2way"
-            
+        model["search"] = "A* 2-Way"
+
     return model
 
 def gridToNode(pos):
@@ -374,12 +378,12 @@ def makeGraph(model):
     return graph
 
 def setPath(model, graph, start, end):
-    if model["search"] == "dfs": model["order"], model["path"] = graph.dfs_path(start, end)
-    if model["search"] == "bfs": model["order"], model["path"] = graph.bfs_path(start, end)
-    if model["search"] == "astar": model["order"], model["path"] = graph.astar_path(start, end, heuristic)
-    if model["search"] == "astar_weighted": model["order"], model["path"] = graph.astar_path(start, end, heuristic, weight = 100)
-    if model["search"] == "bfs2way": model["order"], model["path"] = graph.bfs2way_path(start, end)
-    if model["search"] == "astar2way": model["order"], model["path"] = graph.astar2way_path(start, end, heuristic)
+    if model["search"] == "DFS": model["order"], model["path"] = graph.dfs_path(start, end)
+    if model["search"] == "BFS": model["order"], model["path"] = graph.bfs_path(start, end)
+    if model["search"] == "A*": model["order"], model["path"] = graph.astar_path(start, end, heuristic)
+    if model["search"] == "A* Weighted": model["order"], model["path"] = graph.astar_path(start, end, heuristic, weight = 100)
+    if model["search"] == "BFS 2-Way": model["order"], model["path"] = graph.bfs2way_path(start, end)
+    if model["search"] == "A* 2-Way": model["order"], model["path"] = graph.astar2way_path(start, end, heuristic)
     
 def mouse_handler(model, event):
     x, y = event.pos
