@@ -6,7 +6,7 @@ from pygame.locals import *
 
 # ----------MAZE MAKER----------
 
-QUIT = (-100,-100)
+QUIT = "EXIT"
 gridSize = (50,50)
 tileSize = 11
 halfSize = tileSize // 2
@@ -35,7 +35,15 @@ def main():
             "grid" : defaultdict(list)
             }
     
-    while(running):
+    while (running):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or model == QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                model = key_handler(model, event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                model = mouse_handler(model, event)
+            
         # increment path animation every tick
         if (model["state"] == "graph"):
             model["order_index"] = min(model["order_index"] + 1, len(model["order"]) + len(model["path"]))
@@ -45,14 +53,6 @@ def main():
             for i, d in enumerate(dirs):
                 if d < 0:
                     dirs.pop(i)
-        
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or model == QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                model = key_handler(model, event)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                model = mouse_handler(model, event)
         
         draw_handler(model)
         pygame.display.flip()
@@ -292,6 +292,38 @@ def heuristic(node, goal):
     goalX, goalY = nodeToGrid(goal)
 
     return abs(nodeX - goalX) + abs(nodeY - goalY)
+
+def isLeftClick(event):
+    return event.type == pygame.MOUSEBUTTONDOWN and event.button == 1
+
+def isRightClick(event):
+    return event.type == pygame.MOUSEBUTTONDOWN and event.button == 3
+
+def makeGraph(model):
+    wallDir = {0 : (0,-1), 1 : (1,0), 2 : (0,1), 3 : (-1, 0)}
+
+    edges = defaultdict(list)
+    nvertices = gridSize[0] * gridSize[1]
+    for node in range(nvertices):
+        curGridPos = nodeToGrid(node)
+        for dir in range(4):
+            if dir not in model["grid"][curGridPos]:
+                shift = wallDir[dir]
+                neighborGrid = (curGridPos[0] + shift[0], curGridPos[1] + shift[1])
+                if inBound(neighborGrid):
+                    neighborNode = gridToNode(neighborGrid)
+                    edges[node].append(neighborNode)
+    
+    graph = Graph.Graph(edges, nvertices = nvertices)
+    return graph
+
+def setPath(model, graph, start, end):
+    if model["search"] == "dfs": model["order"], model["path"] = graph.dfs_path(start, end)
+    if model["search"] == "bfs": model["order"], model["path"] = graph.bfs_path(start, end)
+    if model["search"] == "astar": model["order"], model["path"] = graph.astar_path(start, end, heuristic)
+    if model["search"] == "astar_weighted": model["order"], model["path"] = graph.astar_path(start, end, heuristic, weight = 100)
+    if model["search"] == "bfs2way": model["order"], model["path"] = graph.bfs2way_path(start, end)
+    if model["search"] == "astar2way": model["order"], model["path"] = graph.astar2way_path(start, end, heuristic)
     
 def mouse_handler(model, event):
     x, y = event.pos
@@ -308,7 +340,7 @@ def mouse_handler(model, event):
     gridPos = (gridX, gridY)
     pairPos = (gridX + wall[0], gridY + wall[1])
     pairDir = (minIdx + 2) % 4
-    if event.type == pygame.MOUSEBUTTONDOWN and model["state"] == "build":
+    if isLeftClick(event) and model["state"] == "build":
         # remove the wall if its already there and add it if not
         if minIdx in model["grid"][gridPos]:
             for i, d in enumerate(model["grid"][gridPos]):
@@ -321,33 +353,20 @@ def mouse_handler(model, event):
             model["grid"][gridPos].append(minIdx)
             model["grid"][pairPos].append(pairDir)
         
-    elif event.type == pygame.MOUSEBUTTONDOWN and model["state"] == "graph":
+    elif isLeftClick(event) and model["state"] == "graph":
+        model["start"] = gridPos
         model["order_index"] = 0
-        edges = defaultdict(list)
-        nvertices = gridSize[0] * gridSize[1]
-        for node in range(nvertices):
-            curGridPos = nodeToGrid(node)
-            for dir in range(4):
-                if dir not in model["grid"][curGridPos]:
-                    shift = wallDir[dir]
-                    neighborGrid = (curGridPos[0] + shift[0], curGridPos[1] + shift[1])
-                    if inBound(neighborGrid):
-                        neighborNode = gridToNode(neighborGrid)
-                        edges[node].append(neighborNode)
+        graph = makeGraph(model)
+        start = gridToNode(model["start"])
+        end = gridToNode(model["end"])
+        setPath(model, graph, start, end)
         
-        graph = Graph.Graph(edges, nvertices = nvertices)
-        start = gridToNode(gridPos)
-        end = gridToNode((gridSize[0] - 1, gridSize[1] - 1))
-        if model["search"] == "dfs": model["order"], model["path"] = graph.dfs_path(start, end)
-        if model["search"] == "bfs": model["order"], model["path"] = graph.bfs_path(start, end)
-        if model["search"] == "astar": model["order"], model["path"] = graph.astar_path(start, end, heuristic)
-        if model["search"] == "astar_weighted": model["order"], model["path"] = graph.astar_path(start, end, heuristic, weight = 100)
-        if model["search"] == "bfs2way": model["order"], model["path"] = graph.bfs2way_path(start, end)
-        if model["search"] == "astar2way": model["order"], model["path"] = graph.astar2way_path(start, end, heuristic)
         print(len(model["path"]))
+    
+    elif isRightClick(event) and model["state"] == "graph":
+        model["end"] = gridPos
 
     return model
-
         
 if __name__ == '__main__':
     main()
