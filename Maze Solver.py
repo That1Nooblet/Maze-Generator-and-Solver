@@ -395,6 +395,10 @@ def mouse_handler(model, event):
     gridPos = (gridX, gridY)
     pairPos = (gridX + wall[0], gridY + wall[1])
     pairDir = (minIdx + 2) % 4
+
+    # exit early if the click wasnt in bounds
+    if not inBound(gridPos): return model
+
     if isLeftClick(event) and model["state"] == "build":
         # remove the wall if its already there and add it if not
         if minIdx in model["grid"][gridPos]:
