@@ -87,7 +87,7 @@ def draw_sidebar(model):
         f"  {len(model['path'])}",
         "",
         "Explored Nodes:",
-        f"  {len(model['order'])}",
+        f"  {min(model['order_index'], len(model['order']))}",
         "",
     ]
 
@@ -101,7 +101,7 @@ def draw_sidebar(model):
         "  5  BFS 2-Way",
         "  6  A* 2-Way",
         "",
-        "  SPACE  Build / Run",
+        "  SPACE  Build / Solve",
         "  R      Reset",
         "  G      Gen Maze 1",
         "  H      Gen Maze 2",
