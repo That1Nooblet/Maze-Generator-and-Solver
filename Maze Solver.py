@@ -6,7 +6,6 @@ from pygame.locals import *
 
 # ----------MAZE MAKER----------
 
-QUIT = "EXIT"
 gridSize = (50, 50)
 screenHeight = 600
 tileSize = screenHeight // gridSize[1]
@@ -51,13 +50,15 @@ def main():
             "explored" : 0,
             "order" : [], 
             "path" : [], 
-            "grid" : defaultdict(list)
+            "grid" : defaultdict(list),
+            "quit" : False
             }
     
     while (running):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or model == QUIT:
+            if event.type == pygame.QUIT or model["quit"]:
                 running = False
+                break
             elif event.type == pygame.KEYDOWN:
                 model = key_handler(model, event)
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -353,7 +354,7 @@ def key_handler(model, event):
     k = event.key
     
     if k == pygame.K_q:
-        model = QUIT
+        model["quit"] = True
     elif k == pygame.K_r:
         reset(model)
     elif k == pygame.K_g:
