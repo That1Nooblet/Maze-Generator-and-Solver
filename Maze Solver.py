@@ -7,7 +7,7 @@ from pygame.locals import *
 # ----------MAZE MAKER----------
 
 QUIT = "EXIT"
-gridSize = (50, 150)
+gridSize = (50, 50)
 screenHeight = 600
 tileSize = screenHeight // gridSize[1]
 halfSize = tileSize // 2
