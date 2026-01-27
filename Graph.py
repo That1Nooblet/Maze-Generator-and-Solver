@@ -299,99 +299,99 @@ class Graph():
     
     def astar2way_path(self, start, end, heuristic, weight=1):
         n = self.nvertices
+        INF = 10**18
 
-        # forward search
-        vis_f  = [False] * n
-        disc_f = [False] * n
-        dist_f = [0] * n
+        # forward
+        dist_f = [INF] * n
         prev_f = [-1] * n
+        disc_f = [False] * n
+        vis_f  = [False] * n
 
-        # backward search
-        vis_b  = [False] * n
-        disc_b = [False] * n
-        dist_b = [0] * n
+        # backward
+        dist_b = [INF] * n
         prev_b = [-1] * n
+        disc_b = [False] * n
+        vis_b  = [False] * n
 
         pq_f = []
         pq_b = []
 
         order = []
 
-        # initialize
-        startHeur = heuristic(start, end)
-        endHeur   = heuristic(end, start)
+        dist_f[start] = 0
+        dist_b[end]   = 0
 
-        heappush(pq_f, (weight * startHeur, startHeur, 0, start))
-        heappush(pq_b, (weight * endHeur,   endHeur,   0, end))
+        hf = heuristic(start, end)
+        hb = heuristic(end, start)
+
+        heappush(pq_f, (hf, 0, start))
+        heappush(pq_b, (hb, 0, end))
 
         disc_f[start] = True
         disc_b[end]   = True
 
         order.append((start, 0))
-        order.append((end, 0))
+        order.append((end,   0))
 
+        best = INF
         meet = -1
 
         while pq_f and pq_b:
-            # ---------- FORWARD STEP ----------
-            cost, heur, moves, cur = heappop(pq_f)
-            if dist_f[cur] < moves or vis_f[cur]:
+            # 🔑 optimal termination condition
+            if pq_f[0][0] + pq_b[0][0] >= best:
+                break
+
+            # ---------- forward ----------
+            fcost, g, u = heappop(pq_f)
+            if vis_f[u]:
                 pass
             else:
-                for nbr in self.edges[cur]:
-                    if vis_f[nbr]:
+                vis_f[u] = True
+                order.append((u, 1))
+
+                if vis_b[u]:
+                    if dist_f[u] + dist_b[u] < best:
+                        best = dist_f[u] + dist_b[u]
+                        meet = u
+
+                for v in self.edges[u]:
+                    if vis_f[v]:
                         continue
-                    if disc_b[nbr]:
-                        meet = nbr
-                        prev_f[nbr] = cur
-                        break
+                    ng = dist_f[u] + 1
+                    if ng < dist_f[v]:
+                        dist_f[v] = ng
+                        prev_f[v] = u
+                        if not disc_f[v]:
+                            disc_f[v] = True
+                            order.append((v, 0))
+                        heappush(pq_f, (ng + weight * heuristic(v, end), ng, v))
 
-                    newHeur = heuristic(nbr, end)
-                    newCost = weight * newHeur + moves + 1
-
-                    if not disc_f[nbr] or dist_f[nbr] > moves + 1:
-                        dist_f[nbr] = moves + 1
-                        disc_f[nbr] = True
-                        prev_f[nbr] = cur
-                        order.append((nbr, 0))
-                        heappush(pq_f, (newCost, newHeur, moves + 1, nbr))
-
-                vis_f[cur] = True
-                order.append((cur, 1))
-
-            if meet != -1:
-                break
-
-            # ---------- BACKWARD STEP ----------
-            cost, heur, moves, cur = heappop(pq_b)
-            if dist_b[cur] < moves or vis_b[cur]:
+            # ---------- backward ----------
+            fcost, g, u = heappop(pq_b)
+            if vis_b[u]:
                 continue
 
-            for nbr in self.edges[cur]:
-                if vis_b[nbr]:
+            vis_b[u] = True
+            order.append((u, 1))
+
+            if vis_f[u]:
+                if dist_f[u] + dist_b[u] < best:
+                    best = dist_f[u] + dist_b[u]
+                    meet = u
+
+            for v in self.edges[u]:
+                if vis_b[v]:
                     continue
-                if disc_f[nbr]:
-                    meet = nbr
-                    prev_b[nbr] = cur
-                    break
+                ng = dist_b[u] + 1
+                if ng < dist_b[v]:
+                    dist_b[v] = ng
+                    prev_b[v] = u
+                    if not disc_b[v]:
+                        disc_b[v] = True
+                        order.append((v, 0))
+                    heappush(pq_b, (ng + weight * heuristic(v, start), ng, v))
 
-                newHeur = heuristic(nbr, start)
-                newCost = weight * newHeur + moves + 1
-
-                if not disc_b[nbr] or dist_b[nbr] > moves + 1:
-                    dist_b[nbr] = moves + 1
-                    disc_b[nbr] = True
-                    prev_b[nbr] = cur
-                    order.append((nbr, 0))
-                    heappush(pq_b, (newCost, newHeur, moves + 1, nbr))
-
-            vis_b[cur] = True
-            order.append((cur, 1))
-
-            if meet != -1:
-                break
-
-        # ---------- PATH RECONSTRUCTION ----------
+        # ---------- reconstruct ----------
         path = []
         if meet != -1:
             v = meet
