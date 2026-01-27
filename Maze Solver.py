@@ -8,10 +8,20 @@ from pygame.locals import *
 
 QUIT = "EXIT"
 gridSize = (50, 50)
-tileSize = 600 // gridSize[1]
+screenHeight = 600
+tileSize = screenHeight // gridSize[1]
 halfSize = tileSize // 2
 sidebarWidth = 220
 size = (gridSize[0] * tileSize + sidebarWidth, gridSize[1] * tileSize)
+
+GRID_OPTIONS = [
+    (30, 30),
+    (40, 40),
+    (50, 50),
+]
+
+GRID_BUTTONS = []  # populated in init()
+
 
 def init():
     global screen, clock
@@ -19,7 +29,15 @@ def init():
     clock = pygame.time.Clock()
     pygame.init()
     screen = pygame.display.set_mode(size)
-    pygame.display.set_caption("maze thing")
+    pygame.display.set_caption("Maze Generator and Solver")
+
+    panel_x = gridSize[0] * tileSize
+    y = size[1] - 60
+
+    for w, h in GRID_OPTIONS:
+        rect = pygame.Rect(panel_x + 20, y, sidebarWidth - 40, 15)
+        GRID_BUTTONS.append((rect, (w, h)))
+        y += 20
 
 def main():
     init()
@@ -124,6 +142,17 @@ def draw_sidebar(model):
         screen.blit(text, (panel_x + 15, y))
         y += 18
 
+    # ----- grid size buttons -----
+    font_btn = pygame.font.SysFont(None, 16)
+
+    for rect, (w, h) in GRID_BUTTONS:
+        pygame.draw.rect(screen, pygame.Color("darkgray"), rect, border_radius=4)
+        pygame.draw.rect(screen, pygame.Color("black"), rect, 1, border_radius=4)
+
+        label = f"{w} x {h}"
+        text = font_btn.render(label, True, pygame.Color("black"))
+        text_rect = text.get_rect(center=rect.center)
+        screen.blit(text, text_rect)
 
 def draw_handler(model):
     global screen
@@ -218,6 +247,18 @@ def reset(model):
     model["order"] = []
     model["path"] = []
     model["end"] = (gridSize[0] - 1, gridSize[1] - 1)
+
+def change_grid_size(model, w, h):
+    global gridSize, tileSize, halfSize, size, screen
+
+    gridSize = (w, h)
+    tileSize = screenHeight // h
+    halfSize = tileSize // 2
+    size = (gridSize[0] * tileSize + sidebarWidth, gridSize[1] * tileSize)
+
+    screen = pygame.display.set_mode(size)
+
+    reset(model)
 
 def genMaze1(model):
     wallDir = {0 : (0,-1), 1 : (1,0), 2 : (0,1), 3 : (-1, 0)}
@@ -387,6 +428,14 @@ def setPath(model, graph, start, end):
     if model["search"] == "A* 2-Way": model["order"], model["path"] = graph.astar2way_path(start, end, heuristic)
     
 def mouse_handler(model, event):
+    # ----- grid size button clicks -----
+    if isLeftClick(event):
+        for rect, (w, h) in GRID_BUTTONS:
+            if rect.collidepoint(event.pos):
+                change_grid_size(model, w, h)
+                return model
+
+
     x, y = event.pos
     dx = x % tileSize
     dy = y % tileSize
