@@ -452,8 +452,6 @@ def startAnimation(model):
         start = gridToNode(model["start"])
         end = gridToNode(model["end"])
         setPath(model, graph, start, end)
-        
-        print(len(model["path"]))
     
 def mouse_handler(model, event):
     # ----- grid size button clicks -----
