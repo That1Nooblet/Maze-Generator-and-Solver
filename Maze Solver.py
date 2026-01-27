@@ -8,7 +8,7 @@ from pygame.locals import *
 
 QUIT = "EXIT"
 gridSize = (50, 50)
-tileSize = 11
+tileSize = 600 // gridSize[1]
 halfSize = tileSize // 2
 sidebarWidth = 220
 size = (gridSize[0] * tileSize + sidebarWidth, gridSize[1] * tileSize)
