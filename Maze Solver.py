@@ -125,7 +125,7 @@ def draw_sidebar(model):
         "  Left Click (Build) - Place / Delete Wall",
         "  Left Click (Solve) - Start Animation",
         "  Right Click - Set End",
-        "",
+        "  O      Retrace Path",
         "  P      Skip Animation",
         "  R      Reset",
         "  G      Gen Maze 1",
@@ -369,8 +369,11 @@ def key_handler(model, event):
         model["path"] = []
     elif k == pygame.K_SPACE and model["state"] == "graph":
         model["state"] = "build"
-    elif k == pygame.K_p:
+    elif k == pygame.K_o:
         model["order_index"] = len(model["order"]) - 1
+        model["explored"] = countExplored(model)
+    elif k == pygame.K_p:
+        model["order_index"] = len(model["order"]) + len(model["path"])
         model["explored"] = countExplored(model)
     elif k == pygame.K_1:
         model["search"] = "DFS"

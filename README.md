@@ -10,7 +10,8 @@ Space - Toggle Between Build and Solve Mode
 Left Click (During Build Mode) - Place or Delete a wall
 Left Click (During Solve Mode) - Set starting point
 Right Click - Set ending point
-P - Skip to path retracing animation
+O - Skip to path retracing animation
+P - Skip animation entirely
 
 Numbers to switch between graph traversal methods (USE BEFORE LEFT CLICKING):
 1 - DFS
