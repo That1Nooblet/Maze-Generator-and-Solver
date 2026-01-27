@@ -22,7 +22,6 @@ GRID_OPTIONS = [
 
 GRID_BUTTONS = []  # populated in init()
 
-
 def init():
     global screen, clock
     sys.setrecursionlimit(10000)
@@ -374,16 +373,22 @@ def key_handler(model, event):
         model["explored"] = countExplored(model)
     elif k == pygame.K_1:
         model["search"] = "DFS"
+        startAnimation(model)
     elif k == pygame.K_2:
         model["search"] = "BFS"
+        startAnimation(model)
     elif k == pygame.K_3:
         model["search"] = "A*"
+        startAnimation(model)
     elif k == pygame.K_4:
         model["search"] = "A* Weighted"
+        startAnimation(model)
     elif k == pygame.K_5:
         model["search"] = "BFS 2-Way"
+        startAnimation(model)
     elif k == pygame.K_6:
         model["search"] = "A* 2-Way"
+        startAnimation(model)
 
     return model
 
@@ -436,6 +441,15 @@ def setPath(model, graph, start, end):
     if model["search"] == "A* Weighted": model["order"], model["path"] = graph.astar_path(start, end, heuristic, weight = 100)
     if model["search"] == "BFS 2-Way": model["order"], model["path"] = graph.bfs2way_path(start, end)
     if model["search"] == "A* 2-Way": model["order"], model["path"] = graph.astar2way_path(start, end, heuristic)
+
+def startAnimation(model):
+        model["order_index"] = 0
+        graph = makeGraph(model)
+        start = gridToNode(model["start"])
+        end = gridToNode(model["end"])
+        setPath(model, graph, start, end)
+        
+        print(len(model["path"]))
     
 def mouse_handler(model, event):
     # ----- grid size button clicks -----
@@ -479,13 +493,7 @@ def mouse_handler(model, event):
         
     elif isLeftClick(event) and model["state"] == "graph":
         model["start"] = gridPos
-        model["order_index"] = 0
-        graph = makeGraph(model)
-        start = gridToNode(model["start"])
-        end = gridToNode(model["end"])
-        setPath(model, graph, start, end)
-        
-        print(len(model["path"]))
+        startAnimation(model)
     
     elif isRightClick(event) and model["state"] == "graph":
         model["end"] = gridPos
