@@ -48,7 +48,8 @@ def main():
             "start" : (-1,-1),
             "end" : (gridSize[0] - 1, gridSize[1] - 1), 
             "search" : "A*",
-            "order_index" : -1, 
+            "order_index" : -1,
+            "explored" : 0,
             "order" : [], 
             "path" : [], 
             "grid" : defaultdict(list)
@@ -64,8 +65,10 @@ def main():
                 model = mouse_handler(model, event)
             
         # increment path animation every tick
-        if (model["state"] == "graph"):
-            model["order_index"] = min(model["order_index"] + 1, len(model["order"]) + len(model["path"]))
+        maxIndex = len(model["order"]) + len(model["path"])
+        if (model["state"] == "graph" and model["order_index"] <= maxIndex):
+            model["order_index"] += 1
+            model["explored"] = countExplored(model)
 
         # removing the negative values (the hover values) from the dict
         for pos, dirs in model["grid"].items():
@@ -105,7 +108,7 @@ def draw_sidebar(model):
         f"  {len(model['path'])}",
         "",
         "Explored Tiles:",
-        f"  {min(model['order_index'], len(model['order']))}",
+        f"  {model['explored']}",
     ]
 
     hotkeys = [
@@ -240,10 +243,19 @@ def inBound(gridPos):
     yBound = 0 <= y and y < gridSize[1]
     return xBound and yBound
 
+def countExplored(model):
+    idx = min(model["order_index"], len(model["order"]) - 1)
+    explored = 0
+    for i in range(idx + 1):
+        explored += model["order"][i][1]
+    
+    return explored
+
 def reset(model):
     model["grid"] = defaultdict(list)
     model["state"] = "build"
     model["order_index"] = -1
+    model["explored"] = 0
     model["order"] = []
     model["path"] = []
     model["end"] = (gridSize[0] - 1, gridSize[1] - 1)
@@ -343,10 +355,6 @@ def key_handler(model, event):
     
     if k == pygame.K_q:
         model = QUIT
-    elif k == pygame.K_a or k == pygame.K_LEFT:
-        model["order_index"] = max(model["order_index"] - 1, 0)
-    elif k == pygame.K_d or k == pygame.K_RIGHT:
-        model["order_index"] = min(model["order_index"] + 1, len(model["order"]) + len(model["path"]) - 1)
     elif k == pygame.K_r:
         reset(model)
     elif k == pygame.K_g:
@@ -356,12 +364,14 @@ def key_handler(model, event):
     elif k == pygame.K_SPACE and model["state"] == "build":
         model["state"] = "graph"
         model["order_index"] = -1
+        model["explored"] = 0
         model["order"] = []
         model["path"] = []
     elif k == pygame.K_SPACE and model["state"] == "graph":
         model["state"] = "build"
     elif k == pygame.K_p:
         model["order_index"] = len(model["order"]) - 1
+        model["explored"] = countExplored(model)
     elif k == pygame.K_1:
         model["search"] = "DFS"
     elif k == pygame.K_2:
