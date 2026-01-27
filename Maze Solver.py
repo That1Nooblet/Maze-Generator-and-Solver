@@ -43,7 +43,7 @@ def main():
     running = True
     model = {
             "state" : "build", 
-            "start" : (-1,-1),
+            "start" : (0, 0),
             "end" : (gridSize[0] - 1, gridSize[1] - 1), 
             "search" : "A*",
             "order_index" : -1,
