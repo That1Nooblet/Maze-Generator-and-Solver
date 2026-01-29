@@ -55,15 +55,6 @@ def main():
             }
     
     while (running):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or model["quit"]:
-                running = False
-                break
-            elif event.type == pygame.KEYDOWN:
-                model = key_handler(model, event)
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                model = mouse_handler(model, event)
-            
         # increment path animation every tick
         maxIndex = len(model["order"]) + len(model["path"])
         if (model["state"] == "graph" and model["order_index"] <= maxIndex):
@@ -75,6 +66,15 @@ def main():
             for i, d in enumerate(dirs):
                 if d < 0:
                     dirs.pop(i)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or model["quit"]:
+                running = False
+                break
+            elif event.type == pygame.KEYDOWN:
+                model = key_handler(model, event)
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                model = mouse_handler(model, event)
         
         draw_handler(model)
         pygame.display.flip()
